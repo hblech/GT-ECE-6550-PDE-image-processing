@@ -1,4 +1,5 @@
 .ipynb_checkpoints/
-gradients.so
-stable/
-unstable/
+*.so
+*.jpg
+*.png
+*.pyc

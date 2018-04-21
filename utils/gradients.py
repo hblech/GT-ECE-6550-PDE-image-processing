@@ -85,3 +85,19 @@ def heat_equation(img):
             else:
                 It[x,y] = (Ix[x,y]*Ix[x,y]*Iyy[x,y] - 2*Ix[x,y]*Iy[x,y]*Ixy[x,y] + Iy[x,y]*Iy[x,y]*Ixx[x,y]) / (Ix[x,y]*Ix[x,y]+Iy[x,y]*Iy[x,y])
     return It
+
+#pythran export TV_regularization(float[][][], float)
+def TV_regularization(img, beta=0.1):
+    It = np.zeros(img.shape)
+    (size_x, size_y) = img.shape
+    
+    Ix = grad_x(img)
+    Iy = grad_y(img)
+    Ixy = grad_y(Ix)
+    Ixx = grad_xx(img)
+    Iyy = grad_yy(img)
+    
+    for x in range(size_x):
+        for y in range(size_y):
+            It[x,y] = (Iyy[x,y] * Ix[x,y]**2 - 2*Ix[x,y]*Iy[x,y]*Ixy[x,y] + Ixx[x,y] * Iy[x,y]**2 + (Ixx[x,y]+Iyy[x,y]) * beta**2 ) / (Ix[x,y]**2+Iy[x,y]**2 + beta**2)**(3/2)
+    return It
