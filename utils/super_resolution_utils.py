@@ -1,4 +1,5 @@
 import numpy as np
+from .cpp_grad_utils import upsample
 
 def get_lr_dims(shape, q, nb_lr_images):
     hr_shape = list(shape)
@@ -26,22 +27,7 @@ def createLRSamples(image, q=2, nb_lr_images=8, noise_variance=10):
         X[k] = image[::q, ::q] + noise
     return X
 
-#pythran export upsample(float[][][][], int)
-def upsample(lr_im, q):
-    # Get new dimensions
-    hr_dims = get_hr_dims(lr_im.shape, q)
 
-    # Upsampling (D^T)
-    temp_hr = np.zeros(hr_dims)
-    #omp parallel for
-    for i in range(lr_im.shape[0]):
-        for j in range(lr_im.shape[1]):
-            temp_hr[q*i, q*j] = lr_im[i,j]
-    #temp_hr = 1*temp_hr # Unblurring (B^T)
-    #temp_hr = 1*temp_hr # Unwarping (M^T)
-    return temp_hr
-
-#pythran export get_hr_dims((int, int, int), int)
 def get_hr_dims(shape, q):
     hr_dims = list(shape)
     del hr_dims[0]
@@ -49,12 +35,11 @@ def get_hr_dims(shape, q):
         hr_dims[i] *= q
     return tuple(hr_dims)
 
-#pythran export data_fidelity_gradient(float[][][], float[][][][], int)
 def data_fidelity_gradient(hr_image, lr_images, q):
 
     gradE = np.zeros_like(hr_image)
 
-    #omp parallel for
+    
     for k in range(lr_images.shape[0]):
         # Upsampling here
         temp_hr = np.zeros_like(hr_image)
@@ -63,4 +48,15 @@ def data_fidelity_gradient(hr_image, lr_images, q):
                 temp_hr[q*i, q*j] = lr_images[k,i,j]
         gradE += hr_image - temp_hr
     gradE /= lr_images.shape[0]
+    return gradE
+
+def data_fidelity_gradient_2(hr_image, lr_images, q):
+
+    gradE = np.zeros(hr_image.shape)
+
+    #Downsampling HR image
+    temp_lr = hr_image[::q, ::q]
+    for k in range(lr_images.shape[0]):
+        gradE += upsample(temp_lr - lr_images[k], q, hr_image.shape)
+    #gradE /= lr_images.shape[0]
     return gradE

@@ -169,3 +169,18 @@ def compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta):
                 gradient[x,y,z] = comparison_gradient[x,y,z] - l*(tau[x,y,z]*denoising_gradient[x,y,z] + (1-tau[x,y,z])*smoothing_gradient[x,y,z])
 
     return gradient
+
+# pythran export upsample(float[][][], int, (int, int, int))
+def upsample(lr_im, q, hr_shape):
+    
+    # Upsampling (D^T)
+    temp_hr = np.zeros(hr_shape)
+
+    #omp parallel for
+    for i in range(lr_im.shape[0]):
+        for j in range(lr_im.shape[1]):
+            for k in range(lr_im.shape[2]):
+                temp_hr[q*i, q*j, k] = lr_im[i,j,k]
+    #temp_hr = 1*temp_hr # Unblurring (B^T)
+    #temp_hr = 1*temp_hr # Unwarping (M^T)
+    return temp_hr

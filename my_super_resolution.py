@@ -18,11 +18,11 @@ iterations = 400
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 0.8
+l = 5.0
 beta = 0.8
-dt = min(beta/4, 0.5)
+dt = 1/(np.abs(l)*max(4/beta, 2))
 version_tau = 1
-C = 0.1322
+C = 0.25
 exp_file = 'experiences.txt'
 
 with open(exp_file, 'a') as f:
@@ -33,11 +33,15 @@ with open(exp_file, 'a') as f:
 lr_images = createLRSamples(roi, nb_lr_images=nb_lr_im, q=q, noise_variance=noise)
 for i in range(lr_images.shape[0]):
     cv2.imwrite('lr_images/lr_'+str(i)+'.png', lr_images[i])
-
+cv2.imwrite('roi.png', roi)
 # Create new empty HR image. Should work for color and gray images
 hr_dims = get_hr_dims(lr_images.shape, q)
 hr_image = np.zeros(hr_dims)
 
+comparison_gradient = 0
+denoising_gradient = 0
+smoothing_gradient = 0
+tau = 0
 
 for iteration in range(iterations+1):
 
@@ -50,7 +54,8 @@ for iteration in range(iterations+1):
         #TODO: make matplotlib graph with metrics in title ?
         cv2.imwrite(name, hr_image)
         with open(exp_file, 'a') as f:
-            f.write("{}\t{}\t{}\t{}\n".format(iteration, mse, ssim, psnr, name))
+            f.write("{}\t{}\t{}\t{}\n".format(iteration, mse, ssim, psnr))
+            f.write("\t\t{}\t{}\t{}\t{}\t{}\t{}\n".format(np.min(dt*comparison_gradient), np.max(dt*comparison_gradient), np.min(-dt*l*tau*denoising_gradient), np.max(-dt*l*tau*denoising_gradient), np.min(-dt*l*(1-tau)*smoothing_gradient), np.max(-dt*l*(1-tau)*smoothing_gradient)))
             if(mse > 1e8):
                 f.write("Experience diverging, stopping now\n")
                 raise ValueError("The algorithm is diverging")
@@ -67,7 +72,7 @@ for iteration in range(iterations+1):
     Iyy = grad_yy(hr_image)
 
     #Compute data fidelity energy gradient, denoising energy gradient, smoothing energy gradient
-    comparison_gradient = data_fidelity_gradient(hr_image, lr_images, q)
+    comparison_gradient = data_fidelity_gradient_2(hr_image, lr_images, q)
     denoising_gradient = TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta)
     smoothing_gradient = heat_gradient(Ix, Iy, Ixy, Ixx, Iyy)
 
@@ -80,7 +85,7 @@ for iteration in range(iterations+1):
         tau = compute_tau_3(Ix, Iy, C)
 
     #Update HR image: apply gradients to image
-    hr_image -= dt*(comparison_gradient/(1+l) - l/(1+l)*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
+    hr_image -= dt*(comparison_gradient + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
 
     #TODO: put this inside a compiled function. But data_fidelity_gradient is problematic
     # hr_image -= dt*compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta)
