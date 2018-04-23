@@ -18,11 +18,11 @@ iterations = 400
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 0.1
+l = 0.8
 beta = 0.8
 dt = min(beta/4, 0.5)
 version_tau = 1
-C = 0.5
+C = 0.1322
 exp_file = 'experiences.txt'
 
 with open(exp_file, 'a') as f:
@@ -60,27 +60,27 @@ for iteration in range(iterations+1):
 
 
     # Compute directional order 1 and 2 gradients
-    # Ix = grad_x(hr_image)
-    # Iy = grad_y(hr_image)
-    # Ixy = grad_y(Ix)
-    # Ixx = grad_xx(hr_image)
-    # Iyy = grad_yy(hr_image)
+    Ix = grad_x(hr_image)
+    Iy = grad_y(hr_image)
+    Ixy = grad_y(Ix)
+    Ixx = grad_xx(hr_image)
+    Iyy = grad_yy(hr_image)
 
     #Compute data fidelity energy gradient, denoising energy gradient, smoothing energy gradient
     comparison_gradient = data_fidelity_gradient(hr_image, lr_images, q)
-    # denoising_gradient = TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta)
-    # smoothing_gradient = heat_gradient(Ix, Iy, Ixy, Ixx, Iyy)
+    denoising_gradient = TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta)
+    smoothing_gradient = heat_gradient(Ix, Iy, Ixy, Ixx, Iyy)
 
     #Compute weighting factor
-    # if version_tau == 1:
-    #     tau = compute_tau_1(Ix, Iy, C)
-    # elif version_tau == 2:
-    #     tau = compute_tau_2(Ix, Iy)
-    # elif version_tau == 3:
-    #     tau = compute_tau_3(Ix, Iy, C)
+    if version_tau == 1:
+        tau = compute_tau_1(Ix, Iy, C)
+    elif version_tau == 2:
+        tau = compute_tau_2(Ix, Iy)
+    elif version_tau == 3:
+        tau = compute_tau_3(Ix, Iy, C)
 
     #Update HR image: apply gradients to image
-    # hr_image -= dt*(comparison_gradient + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
+    hr_image -= dt*(comparison_gradient/(1+l) - l/(1+l)*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
 
     #TODO: put this inside a compiled function. But data_fidelity_gradient is problematic
-    hr_image -= dt*compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta)
+    # hr_image -= dt*compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta)

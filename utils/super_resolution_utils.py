@@ -54,7 +54,7 @@ def data_fidelity_gradient(hr_image, lr_images, q):
 
     gradE = np.zeros_like(hr_image)
 
-    #omp parallel for reduction(:+gradE)
+    #omp parallel for
     for k in range(lr_images.shape[0]):
         # Upsampling here
         temp_hr = np.zeros_like(hr_image)
