@@ -8,7 +8,7 @@ def get_lr_dims(shape, q, nb_lr_images):
     lr_shape.insert(0, nb_lr_images)
     return tuple(lr_shape)
 
-def createLRrSamples(image, q=2, nb_lr_images=8, noise_variance=10):
+def createLRSamples(image, q=2, nb_lr_images=8, noise_variance=10):
     """
     Generates $ X_k = D_k B_k M_k X + N_k $
         where: $M_k = I$ always, and $ B_k = I$ for now.
