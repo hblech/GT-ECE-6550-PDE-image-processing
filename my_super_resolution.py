@@ -18,13 +18,14 @@ iterations = 20
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 0.2
-beta = 0.5
+l = 5
+beta =1.0
+dt = min(beta/4, 0.5)
 exp_file = 'experiences.txt'
 
 with open(exp_file, 'a') as f:
-    f.write("#Conditions de l'expérience:")
-    f.write("#q={}, nb_lr_images={}, lambda={}, beta={}, nb_iterations={}".format(q, nb_lr_im, l, beta, iterations))
+    f.write("#Conditions de l'expérience:\n")
+    f.write("#q={}, nb_lr_images={}, dt = {}, lambda={}, beta={}, nb_iterations={}\n".format(q, nb_lr_im, dt, l, beta, iterations))
 
 # Create small images and store them somewhere on disk. Should work for gray and color images
 lr_images = createLRSamples(roi, nb_lr_images=nb_lr_im, q=q, noise_variance=noise)
@@ -35,7 +36,19 @@ for i in range(lr_images.shape[0]):
 hr_dims = get_hr_dims(lr_images.shape, q)
 hr_image = np.zeros(hr_dims)
 
-for iteration in range(iterations):
+for iteration in range(iterations+1):
+
+    # Save result
+    if iteration % 10 == 0:
+        mse = compare_mse(roi, hr_image)
+        ssim = compare_ssim(roi, hr_image, multichannel=True)
+        psnr = compare_psnr(roi, hr_image, data_range=255.0)
+        name = 'hr_images/hr_'+str(iteration)+'.png'
+        cv2.imwrite(name, hr_image)
+        with open(exp_file, 'a') as f:
+            f.write("{}\t{}\t{}\t{}\n".format(iteration, mse, ssim, psnr, name))
+        #TODO: make matplotlib graph with metrics in title ?
+        print(iteration)
 
     # Compute directional order 1 and 2 gradients
     Ix = grad_x(hr_image)
@@ -45,7 +58,7 @@ for iteration in range(iterations):
     Iyy = grad_yy(hr_image)
 
     #Compute data fidelity energy gradient, denoising energy gradient, smoothing energy gradient
-    data_fidelity_gradient = data_fidelity_gradient(hr_image, lr_images, q)
+    comparison_gradient = data_fidelity_gradient(hr_image, lr_images, q)
     denoising_gradient = TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta)
     smoothing_gradient = heat_gradient(Ix, Iy, Ixy, Ixx, Iyy)
 
@@ -55,15 +68,4 @@ for iteration in range(iterations):
     #tau = compute_tau_3(Ix, Iy, 0.6)
 
     #Update HR image: apply gradients to image
-    hr_im += dt*(data_fidelity_gradient + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
-
-    if iteration % 5 == 0:
-        mse = compare_mse(roi, hr_im)
-        ssim = compare_ssim(roi, hr_im)
-        psnr = compare_psnr(roi, hr_im, data_range=255.0)
-        name = 'hr_images/hr_'+str(iteration)+'.png'
-        cv2.imwrite(name, hr_image)
-        with open(exp_file, 'a') as f:
-            f.write("{}\t{}\t{}\t{}".format(iteration, mse, ssim, psnr, name))
-        #TODO: make matplotlib graph with metrics in title ?
-        print(iteration)
+    hr_image -= dt*(comparison_gradient + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))

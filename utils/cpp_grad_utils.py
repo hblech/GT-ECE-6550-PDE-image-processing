@@ -74,19 +74,19 @@ def grad_yy(img):
 
 #pythran export TV_regularization(float[][][], float[][][], float[][][], float[][][], float[][][], float)
 def TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta=0.1):
-    It = np.zeros_like(Ix)
+    gradE = np.zeros_like(Ix)
     (size_x, size_y, size_z) = Ix.shape
 
     #omp parallel for
     for x in range(size_x):
         for y in range(size_y):
             for z in range(size_z):
-                It[x,y,z] = (Iyy[x,y,z] * Ix[x,y,z]**2 - 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z] + Ixx[x,y,z] * Iy[x,y,z]**2 + (Ixx[x,y,z]+Iyy[x,y,z]) * beta**2 ) / (Ix[x,y,z]**2+Iy[x,y,z]**2 + beta**2)**(3/2)
-    return It
+                gradE[x,y,z] = -(Iyy[x,y,z] * Ix[x,y,z]**2 - 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z] + Ixx[x,y,z] * Iy[x,y,z]**2 + (Ixx[x,y,z]+Iyy[x,y,z]) * beta**2 ) / (Ix[x,y,z]**2 + Iy[x,y,z]**2 + beta**2)**(3/2)
+    return gradE
 
 #pythran export heat_gradient(float[][][], float[][][], float[][][], float[][][], float[][][])
 def heat_gradient(Ix, Iy, Ixy, Ixx, Iyy):
-    It = np.zeros_like(Ix)
+    gradE = np.zeros_like(Ix)
     (size_x, size_y, size_z) = Ix.shape
 
     #omp parallel for
@@ -94,10 +94,10 @@ def heat_gradient(Ix, Iy, Ixy, Ixx, Iyy):
         for y in range(size_y):
             for z in range(size_z):
                 if Ix[x,y,z] == 0 and Iy[x,y,z] == 0:
-                    It[x,y,z] = - 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z]
+                    gradE[x,y,z] = 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z]
                 else:
-                    It[x,y,z] = (Ix[x,y,z]**2*Iyy[x,y,z] - 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z] + Iy[x,y,z]**2*Ixx[x,y,z]) / (Ix[x,y,z]**2 + Iy[x,y,z]**2)
-    return It
+                    gradE[x,y,z] = -(Ix[x,y,z]**2*Iyy[x,y,z] - 2*Ix[x,y,z]*Iy[x,y,z]*Ixy[x,y,z] + Iy[x,y,z]**2*Ixx[x,y,z]) / (Ix[x,y,z]**2 + Iy[x,y,z]**2)
+    return gradE
 
 #pythran export compute_tau_1(float[][][], float[][][], float)
 def compute_tau_1(Ix, Iy, C):
