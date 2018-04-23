@@ -27,7 +27,7 @@ with open(exp_file, 'a') as f:
     f.write("#q={}, nb_lr_images={}, lambda={}, beta={}, nb_iterations={}".format(q, nb_lr_im, l, beta, iterations))
 
 # Create small images and store them somewhere on disk. Should work for gray and color images
-lr_images = createLRrSamples(roi, nb_lr_images=nb_lr_im, q=q, noise_variance=noise)
+lr_images = createLRSamples(roi, nb_lr_images=nb_lr_im, q=q, noise_variance=noise)
 for i in range(lr_images.shape[0]):
     cv2.imwrite('lr_images/lr_'+str(i)+'.png', lr_images[i])
 

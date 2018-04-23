@@ -72,37 +72,6 @@ def grad_yy(img):
     return gradyy
 
 
-#pythran export get_hr_dims(tuple int, int)
-def get_hr_dims(shape, q):
-    hr_dims = list(shape)
-    del hr_dims[0]
-    for i in range(2):
-        hr_dims[i] *= q
-    return tuple(hr_dims)
-
-#pythran export upsample(float[][][][], int)
-def upsample(lr_im, q):
-    # Get new dimensions
-    hr_dims = get_hr_dims(lr_im.shape, q)
-
-    # Upsampling (D^T)
-    temp_hr = np.zeros(hr_dims)
-    #omp parallel for
-    for i in range(lr_im.shape[0]):
-        for j in range(lr_im.shape[1]):
-            temp_hr[q*i, q*j] = lr_im[i,j]
-    #temp_hr = 1*temp_hr # Unblurring (B^T)
-    #temp_hr = 1*temp_hr # Unwarping (M^T)
-    return temp_hr
-
-#pythran export data_fidelity_gradient(float[][][], float[][][][], int)
-def data_fidelity_gradient(hr_image, lr_images, q):
-    gradE = np.zeros_like(hr_image)
-    for k in range(lr_images.shape[0]):
-        gradE += hr_image - upsample(lr_images[k], q=q)
-    gradE /= nb_lr_im
-    return gradE
-
 #pythran export TV_regularization(float[][][], float[][][], float[][][], float[][][], float[][][], float)
 def TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta=0.1):
     It = np.zeros_like(Ix)
@@ -146,7 +115,7 @@ def compute_tau_1(Ix, Iy, C):
                     tau[x,y,z] = 1
     return tau
 
-#pythran export compute_tau_3(float[][][], float[][][])
+#pythran export compute_tau_2(float[][][], float[][][])
 def compute_tau_2(Ix, Iy):
     gradI = np.sqrt(Ix**2 + Iy**2)
     m = np.max(gradI)
