@@ -138,3 +138,34 @@ def compute_tau_3(Ix, Iy, C):
                 else:
                     tau[x,y,z] = 1
     return tau
+
+#pythran export compute_gradient(float[][][], float[][][], int, float, float, float)
+def compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta):
+
+    #Compute gradients
+    Ix = grad_x(hr_image)
+    Iy = grad_y(hr_image)
+    Ixy = grad_y(Ix)
+    Ixx = grad_xx(hr_image)
+    Iyy = grad_yy(hr_image)
+
+    #Compute weighting factor
+    if version_tau == 1:
+        tau = compute_tau_1(Ix, Iy, C)
+    elif version_tau == 2:
+        tau = compute_tau_2(Ix, Iy)
+    elif version_tau == 3:
+        tau = compute_tau_3(Ix, Iy, C)
+
+    #Compute denoising energy gradient and smoothing energy gradient
+    denoising_gradient = TV_regularization(Ix, Iy, Ixy, Ixx, Iyy, beta)
+    smoothing_gradient = heat_gradient(Ix, Iy, Ixy, Ixx, Iyy)
+
+    gradient = np.zeros_like(comparison_gradient)
+    #omp parallel for
+    for x in range(comparison_gradient.shape[0]):
+        for y in range(comparison_gradient.shape[1]):
+            for z in range(comparison_gradient.shape[2]):
+                gradient[x,y,z] = comparison_gradient[x,y,z] - l*(tau[x,y,z]*denoising_gradient[x,y,z] + (1-tau[x,y,z])*smoothing_gradient[x,y,z])
+
+    return gradient
