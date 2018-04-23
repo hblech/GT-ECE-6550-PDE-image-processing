@@ -27,7 +27,7 @@ def grad_y(img):
     grady = np.zeros(img.shape, dtype=np.float)
     (size_x, size_y, size_z) = img.shape
     
-    "omp parallel for"
+    #omp parallel for
     for z in range(size_z):
         for y in range(size_y):
             grady[0, y, z] = (-3*img[0,y, z] - img[1,y, z] + 4*img[2,y, z])/2.0
