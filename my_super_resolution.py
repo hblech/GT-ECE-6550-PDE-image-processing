@@ -18,11 +18,11 @@ iterations = 750
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 6
+l = 4.0
 beta = 0.8
 dt = 1/(np.abs(l)*max(4/beta, 2))
-version_tau = 2
-C = 3151492
+version_tau = 1
+C = 0.25
 exp_file = 'experiences.txt'
 
 with open(exp_file, 'a') as f:
