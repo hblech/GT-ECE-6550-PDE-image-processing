@@ -1,0 +1,19 @@
+5) Now present some experimental results from applying your discretized
+PDE methods on data. The data can be synthetically generated or real data
+(real data is not important for this project). If you are exploring more
+than one PDE model (and/or testing the effect of changing some parameters in
+your PDE model), then make sure you present multiple experimental results.
+Attempt to extract/present some quantitative information to compare results
+rather than just showing only images. For example, if you are doing anisotropic
+image diffusing to preserve edges, you can devise any sort of reasonable
+quantitative measure to compare the edge preservation effects between
+different PDE choices, and then present a table of the comparisons (or a plot
+showing the way this value changes with the number of PDE iterations for
+each choice of your PDE).
+--------------------------------------------------------------------------------
+
+\section{Experiments}
+
+\subsection{Data fidelity versus regularization}
+
+\subsection{Comparing adaptative weighting schemes}

@@ -78,7 +78,7 @@ E_{reg} (I) = \tau E_{TV}(I) + (1-\tau) E_{S}(I)
 \end{equation*}
 
 Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$. We reduce the gradient of the image in the interval $[0,1]$ by dividing it by its maximum to give $\nabla e$. $C$ is a parameter that varies with our solution.
-
+% Why choose them ? Pro ? Cons ?
 \begin{equation*}
 \tau_1 = \left \{ 
     \begin{split}
@@ -97,7 +97,8 @@ Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$.
 \right .
 \end{equation*}
 
-We introduce $\lambda$ as the parameter weighting the influence of regularization compared to reconstruciton. The energy to minimize is finally:
+
+We introduce $\lambda$ as the parameter weighting the influence of regularization compared to reconstruction. The energy to minimize is finally:
 
 \begin{equation*}
     E(I) = \sum_{k=1}^p{|| D_k B_k M_k I - Y_k ||^2} + \lambda ( \tau \int_\Omega \sqrt{||\nabla I||^2 + \beta^2} dx dy + (1-\tau) \int_\Omega ||\nabla I||^2 dx dy )

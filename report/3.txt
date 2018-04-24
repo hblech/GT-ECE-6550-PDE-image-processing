@@ -78,17 +78,3 @@ I_t &= - ( \sum_{k=1}^p{ I - M_k^T B_k^T D_k^T Y_k)} + \lambda (\tau (- \frac{I_
 I_t &= - ( \sum_{k=1}^p{ I - M_k^T B_k^T D_k^T Y_k)} + \lambda \tau \frac{I_{xx}I_y^2  - 2 I_x I_y I_{xy} + I_{yy}I_x^2 + \beta^2(I_{xx} + I_{yy})}{(I_x^2 + I_y^2 + \beta^2)^(3/2)} + \lambda (1 - \tau) \frac{I_{xx}I_y^2  - 2 I_x I_y I_{xy} + I_{yy}I_x^2}{I_x^2 + I_y^2}
 \end{split}
 \end{equation*}
-
--------------------------------------------------------------------------------
-4) Now, show how the PDE you are using should be discretized and implemented
-on the computer.  You should justify the choices you make in the discretization
-(why, for example, are you using central differences or upwind difference or
-entropy differences for the spatial derivatives, how and why are you choosing
-the time step if your PDE is a time evolution PDE). Make sure it is clear
-to me that you understand the reasons behind your choices (don't just present
-them without explanation).
--------------------------------------------------------------------------------
-
-\section{Discretization of the PDE}
-
-does not diverge under any condition
