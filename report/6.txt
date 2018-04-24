@@ -1,0 +1,10 @@
+6) Finally, discuss what we have learned (beyond what was already covered in
+lecture) as a result of your project. This can be both positive and negative.
+In otherwords, you may have discovered a weakness as well as a strength in
+your PDE based approach while doing your experiments. Try to relate the
+strengths and/or weakness discovered during your experimental testing to
+the assumptions (or lack of assumptions) made in the mathematical formulation
+of your problem. In the case of weakness, suggest what you might do in
+the future if you had more time to reformulate, adjust, or improve your
+model and/or your discrete implementation algorithm.
+------------------------------------------------------------------------------
