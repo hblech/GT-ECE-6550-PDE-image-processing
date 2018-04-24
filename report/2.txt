@@ -1,0 +1,105 @@
+2) Next, "translate", your problem into a mathematical problem. For example,
+if you are using variational gradient descent PDE's, you may want to explain
+how to formulate an energy functional that captures the aspects of your problem
+into a mathematical expression.  You don't necessarily need to introduce the
+PDE yet in this section. This section, should just focus on how to encode
+your problem mathematically.
+--------------------------------------------------------------------------------
+
+\section{Mathematical formulation}
+
+\subsection{Low resolution image generation}
+
+In SR recontruction, a model relating the desired HR image to the LR images is necessary to operate a reconstruction. This model can be approximated from the LR images themselves, but this approach is not considered here.
+
+To make LR images generation simpler, a single HR image is used. Each LR frame corresponds to a downsampled version of the HR image. Noise is added on every LR image to simulate a noisy, low-resolution sensor.
+
+Let $X$ be the original HR frame from which the LR frames $Y_k$ are generated. The relation between the HR image and the LR images is:
+
+\begin{equation*}
+Y_k = D_k B_k M_k X + N_k \quad \text{ for } 1 \leq k \leq p
+\end{equation*}
+
+where $M_k$ is a geometric warp matrix, representing geometric deformation, $B_k$ is a blurring matrix, which accounts for the point spread function (PSF) of the camera sensot=r, and $D_k$ is a downsampling matrix, responsible for representing the loss of spatial resolution. $N_k$ is a matrix representing a normally distributed additive noise.
+
+In the rest of this work, the matrices $B_k$ and $M_k$ were set to the identity matrix: there was no blurring or geometric warping in the LR images.
+
+
+\subsection{Estimating the HR image}
+
+To estimate the HR image, we produce HR images $X_n$ the same size as the original HR one $X$. We try to estimate $X_n$ by minimizing the energy:
+
+\begin{equation*}
+E_{DF}( I ) = \sum_{k=1}^p{|| D_k B_k M_k I - Y_k ||^2}
+\end{equation*}
+
+Minimizing this energy is a simple way to get as close as possible to the original HR image, given the information provided by the LR images $Y_k$. To compute this energy, the desired HR image is downsampled to the same size as the LR images $Y_k$. Minimizing the square norm of the difference of these matrices is equivalent to reduce the distance between them. The resulting HR image should be as close as possible to what the LR samples show of the HR image. 
+
+However, if this energy was the only one considered as a super-resolution reconstruction solution, numerous pixels in the resulting HR image would never have received any information from the LR images. Hence, multiple pixels of the reconstructed image would be zero, and give a poor image quality as a result.
+
+Here is an exemple of such a reconstruction. The original image is a hedgehog's head. It was chosen because it presents multiple desirable features to test: this image is small, and has smooth surfaces as well as sharp edges. It is therefore difficult to reconstruct correctly.
+
+Original image              Striped image
+
+\subsection{Choice of regularization}
+
+Filling in the remaining pixels of the HR image can be seen as a smoothing and denoising process, one which is well known in image processing. The image to reconstruct has several features that we want to preserve: sharp edges and smooth surfaces. But reconstructing an HR image from LR images induces a lot of noise in the resulting image.
+
+Using a denoising regularization, we can prevent the presence of noise in the resulting HR image. We chose to use TV regularization for this purpose. It is an approach that preserves sharp edges in denoising by reducing the L1 norm of the image gradient. It can be written as the following energy functional to minimize:
+
+\begin{equation*}
+E_{TV} (I) = \int_\Omega |\nabla I| dx dy = \int_\Omega \sqrt{||\nabla I||^2 + \beta^2} dx dy
+\end{equation*}
+
+Here, the parameter $\beta$ is used to ensure differentiability of the energy functional when the gradient $\nabla I$ is small.
+The presence of noise in the image induces a high gradient in the region of the noise. TV regularization is known to be successful approach at reducing noise while preserving edges in the image.
+
+However, TV regularization is also known to induce a "stair-case effect" in smooth regions. This approach is not best suited for regions where the gradient is small. In these regions, a smoothing regularization would render more realist surfaces. This is why we also used a smoothing regularization in addition to TV regularization.
+
+To smooth the image, some litterature recommend using fourth order partial differential equations (PDE), as they recover smoother surfaces. An attempt was made using a linear fourth order equation, and can be found in Annex 1. However, due to the difficulty to derive a stability condition, a second order linear equation is used to smooth the image. The smoothing used is the heat equation:
+
+\begin{equation*}
+E_{S} (I) = \int_\Omega ||\nabla I||^2 dx dy
+\end{equation*}
+
+This energy is more adapted than TV regularization to recover smooth surfaces, as it decays in a quadratic form when the gradient is small. This enables us to use distinctively the TV regularization when the gradient is high, e.g. when denoising is required, or near edges, and to use the quadratic smoothing regularization in regions where the gradient is small, e.g. the surface is smooth.
+
+\subsection{Adaptive regularization}
+
+In order to adapt the regularization to the image, we compute a weighting function $\tau$, with values in $[0,1]$.
+To emphasize the restoration properties for TV, the weighting function $\tau$ is 1 along edges, and to emphasize the restoration properties for
+the smoothing, the weighting function $\tau$ is $0 \leq \tau \lt 1$ in smooth regions and small jumps (staircase effect) caused by
+TV.
+
+The regularization term can be written as:
+
+\begin{equation*}
+E_{reg} (I) = \tau E_{TV}(I) + (1-\tau) E_{S}(I)
+\end{equation*}
+
+Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$. We reduce the gradient of the image in the interval $[0,1]$ by dividing it by its maximum to give $\nabla e$. $C$ is a parameter that varies with our solution.
+
+\begin{equation*}
+\tau_1 = \left \{ 
+    \begin{split}
+        &1 \quad \text{ if } |\nabla I| \geq C\\
+        &sin\(\frac{\pi |\nabla I|}{2C}\) \quad \text{ if } |\nabla I| \lt C\\
+    \end{split}
+\right .
+\end{equation*}
+
+\begin{equation*}
+\tau_2 = \left \{ 
+    \begin{split}
+        &1 \quad \text{ if } |\nabla I| \geq C\\
+        &\frac{ 1 - cos\(\frac{\pi |\nabla I|}{2C}\)}{2} \quad \text{ if } |\nabla I| \lt C\\
+    \end{split}
+\right .
+\end{equation*}
+
+We introduce $\lambda$ as the parameter weighting the influence of regularization compared to reconstruciton. The energy to minimize is finally:
+
+\begin{equation*}
+    E(I) = \sum_{k=1}^p{|| D_k B_k M_k I - Y_k ||^2} + \lambda ( \tau \int_\Omega \sqrt{||\nabla I||^2 + \beta^2} dx dy + (1-\tau) \int_\Omega ||\nabla I||^2 dx dy )
+\end{equation*}
+

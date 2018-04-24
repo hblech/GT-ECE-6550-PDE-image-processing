@@ -1,0 +1,9 @@
+\section{Introduction}
+
+In all digital signal processing applications, a signal with a high resolution is often desired for later analysis. In image processing, high resolution images are often sought after. Having a high resolution image gives more details for human interpretation, and helps machine perception algorithms to characterize the image. Here, we will focus only on the spatial resolution of an image, although we could also consider other metrics, such as spectral resolution.
+
+Building a high resolution sensor compatible with most applications is prohibitively expensive and impractical. The resolution of a digital sensor is limited by the resolution of its optics and the resolution of its digital sensor. A perfect digital sensor will not be able to capture more detailed information that the lens is letting through. The same reasoning can be said of a perfect lens with a imperfect sensor: a system will not be better than the worst of its components.
+
+Super resolution techniques are techniques that produce high resolution (HR) images from a set of low resolution (LR) images. Multiple LR images are combined to form a single HR image. This technique is close to single-image interpolation, used to increase the image size. However, in super-resolution, combining multiple LR images gives information on high frequencies that are not present in a single image interpolation.
+
+Each LR image is a undersampled, noisy version of the HR image. SR is only possible using sub-pixel movements between LR frames. Reconstructing an HR image from LR images has proven useful in many contexts and applications, such as medical X-ray CT and MRI imaging, and surveillance video.

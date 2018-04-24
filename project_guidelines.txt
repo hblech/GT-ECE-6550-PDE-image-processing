@@ -42,8 +42,6 @@ different PDE choices, and then present a table of the comparisons (or a plot
 showing the way this value changes with the number of PDE iterations for
 each choice of your PDE).
 
-REPORTS WITHOUT INSIGHTFUL QUANTITATIVE ANALYSIS WILL NOT RECEIVE FULL CREDIT.
-
 6) Finally, discuss what we have learned (beyond what was already covered in
 lecture) as a result of your project. This can be both positive and negative.
 In otherwords, you may have discovered a weakness as well as a strength in

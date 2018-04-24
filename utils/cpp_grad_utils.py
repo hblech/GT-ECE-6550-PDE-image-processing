@@ -119,8 +119,13 @@ def compute_tau_1(Ix, Iy, C):
 def compute_tau_2(Ix, Iy):
     gradI = np.sqrt(Ix**2 + Iy**2)
     m = np.max(gradI)
-    tau = gradI / m
-
+    tau = np.zeros_like(gradI)
+    
+    #omp parallel for
+    for x in range(gradI.shape[0]):
+        for y in range(gradI.shape[1]):
+            for z in range(gradI.shape[2]):
+                tau[x,y,z] = (gradI[x,y,z]**2)/(m**2)
     return tau
 
 #pythran export compute_tau_3(float[][][], float[][][], float)
