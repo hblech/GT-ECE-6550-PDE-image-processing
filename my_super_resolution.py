@@ -11,15 +11,15 @@ from utils.cpp_grad_utils import *
 im_bgr = cv2.imread('hedgehog.jpg')
 im = im_bgr.astype(np.float)
 
-#roi = im[500:900, 800:1300]
-roi = im
+roi = im[500:900, 800:1300]
+#roi = im
 
 # Set important variables
-iterations = 750
+iterations = 200
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 6
+l = 0
 beta = 0.8
 dt = 1/(np.abs(l)*max(4/beta, 2))
 version_tau = 1

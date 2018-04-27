@@ -8,9 +8,11 @@ obtained (don't just present it with no explanation).
 
 \section{Gradient descent equation}
 
+In this part, we will describe how the gradient descent equation is derived from the energy functional.
+
 \subsection{Energy gradients}
 
-In this part, we will describe how the gradient descent equation is derived from the energy functional. The energy described before is made of two components. 
+The energy described before is made of two components. We expose how to easily get to the energy gradient by considering each of these two components of the energy.
 
 The first part, $\sum_{k=1}^p{|| D_k B_k M_k I - Y_k ||^2}$, describes the difference between the HR image and the LR pictures. It is not a geometric energy, and does not depend on any gradient of the image. We show in the annex that the gradient of a squared norm is:
 $\nabla_X ||AX+B||^2 = A^TAX+A^TB$. So the gradient of the data fidelity term is:

@@ -78,7 +78,6 @@ E_{reg} (I) = \tau E_{TV}(I) + (1-\tau) E_{S}(I)
 \end{equation*}
 
 Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$. We reduce the gradient of the image in the interval $[0,1]$ by dividing it by its maximum to give $\nabla e$. $C$ is a parameter that varies with our solution.
-% Why choose them ? Pro ? Cons ?
 \begin{equation*}
 \tau_1 = \left \{ 
     \begin{split}
@@ -87,6 +86,8 @@ Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$.
     \end{split}
 \right .
 \end{equation*}
+
+% Figure
 
 \begin{equation*}
 \tau_2 = \left \{ 
@@ -97,6 +98,10 @@ Two weighting functions have been tested in this project, $\tau_1$ and $\tau_2$.
 \right .
 \end{equation*}
 
+% Figure
+
+% Why choose them ? Pro ? Cons ?
+These schemes share some characteristics. For example, they are all parametric. This allows us to tune the influence of smoothing and denoising while reconstructing the HR image. 
 
 We introduce $\lambda$ as the parameter weighting the influence of regularization compared to reconstruction. The energy to minimize is finally:
 

@@ -83,4 +83,4 @@ Here, since the weighting coefficient $\tau$ is not fixed, but varies in $[0,1]$
 \end{split}
 \end{equation*}
 
-This is the CFL condition of the adaptatively weighted regularization scheme.
+This is the CFL condition of the adaptatively weighted regularization scheme. As we expected, this scheme can be stable, as a it is a linear combination of linear equations.
