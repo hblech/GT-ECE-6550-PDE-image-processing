@@ -19,7 +19,7 @@ iterations = 200
 q = 2
 nb_lr_im = 8
 noise = 0.1*(np.max(roi) - np.min(roi))
-l = 0
+l = 6
 beta = 0.8
 dt = 1/(np.abs(l)*max(4/beta, 2))
 version_tau = 1
@@ -56,7 +56,6 @@ for iteration in range(iterations+1):
         cv2.imwrite(name, hr_image)
         with open(exp_file, 'a') as f:
             f.write("{}\t{}\t{}\t{}\t{}\n".format(iteration, mse, ssim, psnr, name))
-            #f.write("\t\t{}\t{}\t{}\t{}\t{}\t{}\n".format(np.min(dt*comparison_gradient), np.max(dt*comparison_gradient), np.min(-dt*l*tau*denoising_gradient), np.max(-dt*l*tau*denoising_gradient), np.min(-dt*l*(1-tau)*smoothing_gradient), np.max(-dt*l*(1-tau)*smoothing_gradient)))
             if(mse > 1e8):
                 f.write("Experience diverging, stopping now\n")
                 raise ValueError("The algorithm is diverging")
@@ -86,7 +85,7 @@ for iteration in range(iterations+1):
         tau = compute_tau_3(Ix, Iy, C)
 
     #Update HR image: apply gradients to image
-    hr_image -= dt*(comparison_gradient + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
+    hr_image -= dt*(comparison_gradient) # + l*(tau*denoising_gradient + (1-tau)*smoothing_gradient))
 
     #TODO: put this inside a compiled function. But data_fidelity_gradient is problematic
     # hr_image -= dt*compute_gradient(hr_image, comparison_gradient, version_tau, l, C, beta)
