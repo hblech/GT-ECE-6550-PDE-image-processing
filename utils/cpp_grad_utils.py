@@ -2,39 +2,38 @@
 
 import numpy as np
 
-
 #pythran export grad_x(float[][][])
 def grad_x(img):
     """
-    Compute gradient on x direction using central difference approximation
+    #Compute gradient on x direction using central difference approximation
     """
     gradx = np.zeros(img.shape, dtype=np.float)
     (size_x, size_y, size_z) = img.shape
 
     #omp parallel for
     for z in range(size_z):
-        for x in range(size_x):
-            gradx[x, 0, z] = (-3*img[x,0, z] - img[x,1, z] + 4*img[x,2, z])/2.0
-            gradx[x, -1, z] = (3*img[x,-1, z] - 4*img[x,-2, z] + img[x,-3, z])/2.0
-            for y in range(1,size_y-1):
-                gradx[x, y, z] = ( -img[x,y-1, z] + img[x, y+1, z])/2.0
+        for y in range(size_y):
+            gradx[0, y, z] = (-3*img[0,y, z] - img[1,y, z] + 4*img[2,y, z])/2.0
+            gradx[-1, y, z] = (3*img[-1,y, z] - 4*img[-2,y, z] + img[-3,y, z])/2.0
+            for x in range(1,size_x-1):
+                gradx[x, y, z] = ( -img[x-1,y, z] + img[x+1, y, z])/2.0
     return gradx
 
 #pythran export grad_y(float[][][])
 def grad_y(img):
     """
-    #Compute gradient on x direction using central difference approximation
+    Compute gradient on x direction using central difference approximation
     """
     grady = np.zeros(img.shape, dtype=np.float)
     (size_x, size_y, size_z) = img.shape
 
     #omp parallel for
     for z in range(size_z):
-        for y in range(size_y):
-            grady[0, y, z] = (-3*img[0,y, z] - img[1,y, z] + 4*img[2,y, z])/2.0
-            grady[-1, y, z] = (3*img[-1,y, z] - 4*img[-2,y, z] + img[-3,y, z])/2.0
-            for x in range(1,size_x-1):
-                grady[x, y, z] = ( -img[x-1,y, z] + img[x+1, y, z])/2.0
+        for x in range(size_x):
+            grady[x, 0, z] = (-3*img[x,0, z] - img[x,1, z] + 4*img[x,2, z])/2.0
+            grady[x, -1, z] = (3*img[x,-1, z] - 4*img[x,-2, z] + img[x,-3, z])/2.0
+            for y in range(1,size_y-1):
+                grady[x, y, z] = ( -img[x,y-1, z] + img[x, y+1, z])/2.0
     return grady
 
 #pythran export grad_xx(float[][][])

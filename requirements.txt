@@ -1,0 +1,4 @@
+numpy
+pythran
+opencv-python
+scikit-image
